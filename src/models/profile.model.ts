@@ -1,5 +1,5 @@
 import { DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
-import { sequelize } from '../config/database';
+import { sequelize } from '.';
 import Contract from './contract.model';
 
 class Profile extends Model<InferAttributes<Profile>, InferCreationAttributes<Profile>> {}

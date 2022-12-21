@@ -1,5 +1,5 @@
 import { DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
-import { sequelize } from '../config/database';
+import { sequelize } from '.';
 
 class Job extends Model<InferAttributes<Job>, InferCreationAttributes<Job>> {}
 Job.init(
