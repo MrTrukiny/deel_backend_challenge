@@ -2,5 +2,6 @@
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "outDir": "build",
+    "typeRoots": ["./node_module/@types", "./src/types"] // Allows ts-node to load custom types
   }
 }
