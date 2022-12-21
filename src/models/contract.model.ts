@@ -1,5 +1,6 @@
 import { DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
 import { sequelize } from '.';
+import { ContractStatus } from '../types/contract.types';
 import Job from './job.model';
 
 class Contract extends Model<InferAttributes<Contract>, InferCreationAttributes<Contract>> {}
@@ -10,7 +11,11 @@ Contract.init(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM('new', 'in_progress', 'terminated'),
+      type: DataTypes.ENUM(
+        ContractStatus.NEW,
+        ContractStatus.IN_PROGRESS,
+        ContractStatus.TERMINATED,
+      ),
     },
   },
   {

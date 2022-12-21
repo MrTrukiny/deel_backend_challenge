@@ -2,6 +2,7 @@
 
 This version includes possible breaking changes. Read the log carefully.
 
-3. Fix models and database configuration that was causing the 'seed' script (sequelize) to make wrong table relationships. Fix the GET contract by id endpoint to return the contract only if it belongs to the profile calling.
+4. Create a new /api/v1/contracts endpoint to GET All the contracts only if they belong to the profile calling. Create a new ContractStatus enum to handle this kind of word (properties) and better avoid typos.
+3. Fix models and database configuration that was causing the 'seed' script (sequelize) to make wrong table relationships. Fix the /api/v1/contracts/:contractId endpoint to GET the contract only if it belongs to the profile calling.
 2. Migrate code from JavaScript to TypeScript. Separate models into single files and move the database connection to the config folder. Add a custom type to Express Response and Request interfaces to be allowed to use req.profile property. Remove the body-parser library to use the express.json() method that Express has included since version 4.
 1. Install required dependencies and create config files to run the project using TypeScript, ESLint, Prettier, and Nodemon. Modify package.json to include some new scripts. Add a script to run in debugging mode. Add CHANGELOG file.
