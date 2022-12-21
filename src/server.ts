@@ -9,7 +9,6 @@ async function init() {
       console.log(`Express App Listening on Port ${PORT}`);
     });
   } catch (error) {
-    console.log(error);
     console.error(`An error occurred: ${JSON.stringify(error)}`);
     process.exit(1);
   }
