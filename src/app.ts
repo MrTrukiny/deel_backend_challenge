@@ -58,7 +58,7 @@ app.get('/api/v1/jobs/unpaid', getProfile, async (req, res) => {
   if (!profile) return res.status(404).json({ error: 'No Jobs found' });
 
   const jobs = await Contract.findAll({
-    attributes: [['id', 'contractId'], 'clientId', 'contractorId'],
+    attributes: [['id', 'contractId'], 'clientId', 'contractorId', 'status'],
     where: {
       [Op.or]: [{ clientId: profile.id }, { contractorId: profile.id }],
       status: ContractStatus.IN_PROGRESS,
@@ -139,6 +139,69 @@ app.post('/api/v1/jobs/:jobId/pay', getProfile, async (req, res) => {
     res.status(200).json({ message: 'Job paid successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+/**
+ * @description Deposits money into the balance of a Client, a Client can't deposit more than 25% his total of jobs price to pay (at the deposit moment).
+ * @returns a success message or an error
+ */
+app.post('/api/v1/balances/deposit/:userId', getProfile, async (req, res) => {
+  const { Contract, Job, Profile } = req.app.get('models');
+  const { userId } = req.params;
+  const { profile } = req;
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+  if (profile.id !== Number(userId)) {
+    return res.status(403).json({ error: 'You can not deposit for another Profile' });
+  }
+
+  const { amount } = req.body;
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Amount is required and must be greater than 0' });
+  }
+
+  const { balance } = profile;
+  const totalJobsToPay = await Job.sum('price', {
+    where: { [Op.or]: [{ paid: false }, { paid: null }] },
+    include: [
+      {
+        model: Contract,
+        as: 'contract',
+        where: { clientId: profile.id, status: ContractStatus.IN_PROGRESS },
+      },
+    ],
+  });
+
+  const maxDeposit = totalJobsToPay * 1.25;
+
+  if (totalJobsToPay === 0) {
+    return res.status(400).json({
+      error: 'You can not deposit money because you have no jobs to pay',
+    });
+  }
+
+  if (balance + amount > maxDeposit) {
+    return res.status(400).json({
+      error: `You can not deposit more than 25% of your total jobs to pay. Please pay some jobs first. MaxDeposit: ${maxDeposit}, Balance: ${balance}, MaxAmount: ${(
+        maxDeposit - balance
+      ).toFixed(2)}`,
+    });
+  }
+
+  try {
+    await Profile.update(
+      {
+        balance: sequelize.literal(`
+        CASE WHEN balance IS NULL THEN ${amount} ELSE balance + ${amount} END
+      `),
+      },
+      { where: { id: userId } },
+    );
+
+    return res.status(200).json({ message: 'Deposit successful' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
