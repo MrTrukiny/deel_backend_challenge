@@ -205,4 +205,59 @@ app.post('/api/v1/balances/deposit/:userId', getProfile, async (req, res) => {
   }
 });
 
+/**
+ * @description Returns the profession that earned the most money (sum of jobs paid) for any Contractor that worked in the query time range.
+ * @returns a success message or an error
+ */
+app.get('/api/v1/admin/best-profession', async (req, res) => {
+  const { Contract, Job, Profile } = req.app.get('models');
+  const { start, end } = req.query;
+
+  if (!start || !end) {
+    return res.status(400).json({ error: 'Start and End dates are required' });
+  }
+
+  const bestProfession = await Profile.findAll({
+    attributes: [
+      'profession',
+      [sequelize.fn('sum', sequelize.col('contractor.jobs.price')), 'total'],
+    ],
+    where: {
+      id: {
+        [Op.in]: sequelize.literal(
+          `(SELECT contractorId FROM Contracts WHERE id IN (SELECT contractId FROM Jobs WHERE paid = true AND paymentDate BETWEEN '${start}' AND '${end}'))`,
+        ),
+      },
+    },
+    include: [
+      {
+        model: Contract,
+        as: 'contractor',
+        where: {
+          id: {
+            [Op.in]: sequelize.literal(
+              `(SELECT contractId FROM Jobs WHERE paid = true AND paymentDate BETWEEN '${start}' AND '${end}')`,
+            ),
+          },
+        },
+        include: [
+          {
+            model: Job,
+            as: 'jobs',
+            where: { paid: true, paymentDate: { [Op.between]: [start, end] } },
+          },
+        ],
+      },
+    ],
+    group: ['profession'],
+    order: [[sequelize.literal('total'), 'DESC']],
+  });
+
+  if (!bestProfession || !bestProfession.length) {
+    return res.status(200).json({ message: 'There are no Jobs in this period' });
+  }
+
+  return res.status(200).json({ data: { bestProfession: bestProfession[0].profession } });
+});
+
 export default app;
