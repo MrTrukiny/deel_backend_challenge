@@ -260,4 +260,68 @@ app.get('/api/v1/admin/best-profession', async (req, res) => {
   return res.status(200).json({ data: { bestProfession: bestProfession[0].profession } });
 });
 
+/**
+ * @description Returns the Clients that paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.
+ * @example /api/v1/admin/best-clients?start=2020-01-01&end=2020-12-31&limit=3
+ * @returns a success message or an error
+ */
+app.get('/api/v1/admin/best-clients', async (req, res) => {
+  const { Contract, Job, Profile } = req.app.get('models');
+  const { start, end, limit } = req.query;
+
+  if (!start || !end) {
+    return res.status(400).json({ error: 'Start and End dates are required' });
+  }
+
+  const bestClients = await Profile.findAll({
+    // There is a bug in sequelize that does not allow to use limit when include is used. This is a workaround for that.
+    limit: limit || 2,
+    subQuery: false,
+    // I found this solution in this issue: https://github.com/sequelize/sequelize/issues/9651#issuecomment-460160022
+    attributes: [
+      'id',
+      'firstName',
+      'lastName',
+      [sequelize.fn('sum', sequelize.col('client.jobs.price')), 'total'],
+    ],
+    where: {
+      id: {
+        [Op.in]: sequelize.literal(
+          `(SELECT clientId FROM Contracts WHERE id IN (SELECT contractId FROM Jobs WHERE paid = true AND paymentDate BETWEEN '${start}' AND '${end}'))`,
+        ),
+      },
+    },
+    include: [
+      {
+        model: Contract,
+        as: 'client',
+        where: {
+          id: {
+            [Op.in]: sequelize.literal(
+              `(SELECT contractId FROM Jobs WHERE paid = true AND paymentDate BETWEEN '${start}' AND '${end}')`,
+            ),
+          },
+        },
+        required: true,
+        include: [
+          {
+            model: Job,
+            as: 'jobs',
+            where: { paid: true, paymentDate: { [Op.between]: [start, end] } },
+            required: true,
+          },
+        ],
+      },
+    ],
+    group: ['firstName', 'lastName'],
+    order: [[sequelize.literal('total'), 'DESC']],
+  });
+
+  if (!bestClients || !bestClients.length) {
+    return res.status(200).json({ message: 'There are no Clients in this period' });
+  }
+
+  return res.status(200).json({ data: { bestClients } });
+});
+
 export default app;

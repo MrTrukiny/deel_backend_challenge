@@ -2,6 +2,7 @@
 
 This version includes possible breaking changes. Read the log carefully.
 
+9. Create a new /api/v1/admin/best-clients?start=<date>&end=<date>&limit=<number> endpoint that returns the Clients that paid the most for jobs in the query time period. Limit query parameter should be applied, default limit is 2.
 8. Create a new /api/v1/admin/best-profession?start=<date>&end=<date> endpoint that returns the profession that earned the most money (sum of jobs paid) for any Contractor that worked in the query time range.
 7. Create a new /api/v1/balances/deposit/:userId endpoint to deposit money into the balance of a Client (userId). A Client can't deposit more than 25% his total of jobs price to pay (at the deposit moment).
 6. Create a new /api/v1/jobs/:jobId/pay endpoint to POST a payment from a Client to a Contractor. A Client can only pay if his balance >= the amount to pay, and if the Contract is active. The amount should be moved from the Client's balance to the Contractor balance.

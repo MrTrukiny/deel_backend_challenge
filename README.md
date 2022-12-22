@@ -57,7 +57,7 @@ Below is a list of the required API's for the application.
 4. **_POST_** `/jobs/:job_id/pay` - Pay for a job, a client can only pay if his balance >= the amount to pay. The amount should be moved from the client's balance to the contractor balance.
 5. **_POST_** `/balances/deposit/:userId` - Deposits money into the balance of a Client, a Client can't deposit more than 25% his total of jobs to pay (at the deposit moment).
 6. **_GET_** `/admin/best-profession?start=<date>&end=<date>` - Returns the profession that earned the most money (sum of jobs paid) for any Contractor that worked in the query time range.
-7. **_GET_** `/admin/best-clients?start=<date>&end=<date>&limit=<integer>` - returns the clients the paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.
+7. **_GET_** `/admin/best-clients?start=<date>&end=<date>&limit=<integer>` - Returns the Clients that paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.
 
 ```
  [
