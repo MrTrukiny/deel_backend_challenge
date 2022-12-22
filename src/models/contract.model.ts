@@ -24,7 +24,7 @@ Contract.init(
   },
 );
 
-Contract.hasMany(Job);
-Job.belongsTo(Contract);
+Contract.hasMany(Job, { as: 'jobs', foreignKey: 'contractId' });
+Job.belongsTo(Contract, { as: 'contract' });
 
 export default Contract;
