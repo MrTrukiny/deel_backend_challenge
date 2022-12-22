@@ -2,6 +2,11 @@
 
 This version includes possible breaking changes. Read the log carefully.
 
+14. TODO: Finish API documentation. I started using POSTMAN. [Here you can find it](https://documenter.getpostman.com/view/7063210/2s8Z6u5avF).
+13. TODO: Add a logger. One logger saves million lives.
+12. TODO: Add a complete error handling strategy to cover most of the errors and send proper API error messages. 
+11. TODO: Refactorize folder structure and Project/APIs architecture. I'd use some clean architecture approach by separating code into layers. Something like: routes -> expressCallback(optional) -> middlewares(auth, profile) -> controllers -> useCases -> dataAccess -> response/error-middlewares.
+10. TODO: Create unit/integration test to verify all the APIs functionality, probably starting with those that involve money transactions. I'd use jest and supertest libraries.
 9. Create a new /api/v1/admin/best-clients?start=<date>&end=<date>&limit=<number> endpoint that returns the Clients that paid the most for jobs in the query time period. Limit query parameter should be applied, default limit is 2.
 8. Create a new /api/v1/admin/best-profession?start=<date>&end=<date> endpoint that returns the profession that earned the most money (sum of jobs paid) for any Contractor that worked in the query time range.
 7. Create a new /api/v1/balances/deposit/:userId endpoint to deposit money into the balance of a Client (userId). A Client can't deposit more than 25% his total of jobs price to pay (at the deposit moment).

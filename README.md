@@ -1,5 +1,14 @@
 # DEEL BACKEND TASK
 
+## 👀 README INSIDE README 👀
+
+First of all, thank you for this opportunity. I had a good time solving this exciting exercise. I ran out of time and couldn't finish it as I'd wished (my bad, I started yesterday morning, as you will see on my git logs).
+However, I created a CHANGELOG.md file that summarizes what I did and would have done.
+I also left a couple of comments inside the code in areas where I'd search for help if this were a real live exercise.
+Lastly, don't forget to visit the [(uncompleted) Postman Documentation](https://documenter.getpostman.com/view/7063210/2s8Z6u5avF) that I created to test my work and make yours easy.
+
+Enjoy!
+
 ## 💫 Welcome! 🎉
 
 This backend exercise involves building a Node.js/Express.js app that will serve a REST API. We imagine you should spend around 3 hours at implement this feature.
@@ -16,7 +25,7 @@ Each profile has a balance property.
 
 ### Contract
 
-A contract between and client and a contractor.
+A contract between a client and a contractor.
 Contracts have 3 statuses, `new`, `in_progress`, `terminated`. contracts are considered active only when in status `in_progress`
 Contracts group jobs within them.
 
