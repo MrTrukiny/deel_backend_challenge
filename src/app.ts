@@ -89,4 +89,57 @@ app.get('/api/v1/jobs/unpaid', getProfile, async (req, res) => {
   res.status(200).json({ data: { jobs } });
 });
 
+/**
+ * @description Pay for a job which has a contract status in_progress. A client can only pay if his balance >= the amount to pay. The amount should be moved from the client's balance to the contractor balance.
+ * @returns a success message or an error
+ */
+app.post('/api/v1/jobs/:jobId/pay', getProfile, async (req, res) => {
+  const { Contract, Job, Profile } = req.app.get('models');
+  const { jobId } = req.params;
+  const { profile } = req;
+  if (!profile) return res.status(404).json({ error: 'Job not found' });
+
+  const job = await Job.findOne({
+    where: { id: jobId, [Op.or]: [{ paid: false }, { paid: null }] },
+    include: [
+      {
+        model: Contract,
+        as: 'contract',
+        where: { clientId: profile.id, status: ContractStatus.IN_PROGRESS },
+      },
+    ],
+  });
+  if (!job)
+    return res.status(404).json({
+      error: 'Job already paid, not found, or the Contract for this Profile is not active',
+    });
+
+  const { price } = job;
+  if (profile.balance < price) {
+    return res.status(400).json({ error: 'Insufficient funds' });
+  }
+
+  try {
+    await sequelize.transaction(async (t) => {
+      await Profile.update(
+        { balance: sequelize.literal(`balance - ${price}`) },
+        { where: { id: job.contract.clientId } },
+        { transaction: t },
+      );
+
+      await Profile.update(
+        { balance: sequelize.literal(`balance + ${price}`) },
+        { where: { id: job.contract.contractorId } },
+        { transaction: t },
+      );
+
+      await Job.update({ paid: true }, { where: { id: jobId } }, { transaction: t });
+    });
+
+    res.status(200).json({ message: 'Job paid successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 export default app;
